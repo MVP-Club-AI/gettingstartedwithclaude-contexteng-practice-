@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your First Vibe Code</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #ffffff;
+    color: #334155;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    min-height: 100vh;
+  }
+
+  /* Progress */
+  .progress-bar { background: #f1f5f9; border-radius: 100px; height: 6px; margin-bottom: 8px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #6366f1, #7c3aed); height: 100%; border-radius: 100px; transition: width 0.4s ease; }
+  .progress-labels { display: flex; justify-content: space-between; margin-bottom: 28px; font-size: 12px; color: #94a3b8; }
+
+  /* Step header */
+  .step-header { margin-bottom: 24px; }
+  .step-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .step-header p { font-size: 16px; color: #64748b; }
+
+  /* Content area */
+  .step-content { margin-bottom: 32px; }
+  .step-content > p { font-size: 17px; line-height: 1.8; color: #334155; margin-bottom: 20px; }
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* Navigation */
+  .nav { display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+  .btn { padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.9; }
+  .btn-back { flex: 1; border: 1px solid #e2e8f0; background: white; color: #64748b; }
+  .btn-next { flex: 2; background: linear-gradient(135deg, #6366f1, #7c3aed); color: white; }
+
+  /* Step dots */
+  .dots { display: flex; justify-content: center; gap: 6px; margin-top: 20px; }
+  .dot { width: 8px; height: 8px; border-radius: 100px; border: none; cursor: pointer; padding: 0; transition: all 0.3s ease; background: #e2e8f0; }
+  .dot.active { width: 24px; background: #6366f1; }
+  .dot.completed { background: #a5b4fc; }
+
+  /* Reusable blocks */
+  .callout { padding: 16px 20px; border-radius: 0 12px 12px 0; margin-bottom: 20px; }
+  .callout-purple { background: #faf5ff; border-left: 4px solid #7c3aed; }
+  .callout-green { background: #f0fdf4; border-left: 4px solid #16a34a; }
+  .callout-blue { background: #f0f9ff; border-left: 4px solid #0284c7; }
+  .callout-amber { background: #fffbeb; border-left: 4px solid #f59e0b; }
+  .callout-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .callout-text { font-size: 13px; color: #475569; line-height: 1.7; }
+
+  .dark-card { background: #1e1b4b; border-radius: 16px; padding: 28px; margin-bottom: 24px; text-align: center; }
+  .dark-card h2 { font-size: 22px; font-weight: 700; color: #e0e7ff; margin-bottom: 8px; }
+  .dark-card p { font-size: 14px; color: #a5b4fc; line-height: 1.7; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px; text-align: center;
+  }
+
+  /* How-it-works diagram */
+  .how-it-works { display: flex; gap: 12px; align-items: stretch; }
+  .how-card { flex: 1; border-radius: 12px; padding: 16px; text-align: center; }
+  .how-card-icon { font-size: 24px; margin-bottom: 6px; }
+  .how-card-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .how-card-desc { font-size: 11px; line-height: 1.5; }
+  .how-card-left { background: white; border: 1px solid #e2e8f0; }
+  .how-card-left .how-card-title { color: #334155; }
+  .how-card-left .how-card-desc { color: #94a3b8; }
+  .how-card-right { background: linear-gradient(135deg, #ede9fe, #f5f3ff); border: 2px solid #7c3aed; }
+  .how-card-right .how-card-title { color: #6d28d9; }
+  .how-card-right .how-card-desc { color: #7c3aed; }
+  .how-arrow { display: flex; align-items: center; font-size: 16px; color: #cbd5e1; }
+
+  /* Folder tree */
+  .folder-tree { background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 16px 8px; margin-bottom: 20px; }
+  .tree-header { padding: 0 12px 10px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; }
+  .tree-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+  .tree-item:hover { background: #f0f9ff; }
+  .tree-item.folder { cursor: default; }
+  .tree-item.folder:hover { background: transparent; }
+  .tree-icon { font-size: 16px; }
+  .tree-name { font-family: monospace; font-size: 14px; color: #334155; }
+  .tree-name.folder-name { color: #6d28d9; font-weight: 700; }
+  .tree-hint { font-size: 11px; font-weight: 600; margin-left: auto; opacity: 0.5; transition: opacity 0.15s; }
+  .tree-item:hover .tree-hint { opacity: 1; }
+  .tree-tooltip { padding: 8px 14px; border-radius: 0 8px 8px 0; font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 4px; background: #f8fafc; display: none; }
+  .tree-tooltip.visible { display: block; }
+  .tree-footer { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 10px; font-style: italic; }
+
+  /* Website anatomy tabs */
+  .anatomy-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .anatomy-tab { flex: 1; padding: 12px 8px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .anatomy-tab.active { border-color: var(--tab-color); background: var(--tab-bg); }
+  .anatomy-tab-label { font-size: 15px; font-weight: 800; }
+  .anatomy-tab-meta { font-size: 11px; color: #94a3b8; font-style: italic; }
+  .anatomy-content { display: none; margin-bottom: 24px; }
+  .anatomy-content.active { display: block; }
+  .anatomy-desc { font-size: 14px; color: #475569; line-height: 1.7; padding: 0 4px; margin-top: 12px; }
+  .anatomy-hint { text-align: center; font-size: 13px; color: #94a3b8; padding: 12px; font-style: italic; }
+
+  /* HTML visual */
+  .visual-html { border: 2px dashed #e76f51; border-radius: 12px; padding: 16px; background: #fff5f3; }
+  .visual-html .bar { height: 14px; width: 60%; background: #e76f51; border-radius: 4px; margin-bottom: 8px; opacity: 0.7; }
+  .visual-html .line { height: 8px; background: #e76f51; border-radius: 4px; margin-bottom: 4px; opacity: 0.3; }
+  .visual-html .line1 { width: 90%; }
+  .visual-html .line2 { width: 75%; margin-bottom: 12px; }
+  .visual-html .boxes { display: flex; gap: 8px; }
+  .visual-html .box { height: 40px; flex: 1; border: 1px dashed #e76f51; border-radius: 6px; opacity: 0.5; }
+
+  /* CSS visual */
+  .visual-css { border-radius: 12px; padding: 16px; background: linear-gradient(135deg, #0f172a, #1e293b); }
+  .visual-css .bar { height: 14px; width: 60%; background: linear-gradient(90deg, #2a9d8f, #6ee7b7); border-radius: 20px; margin-bottom: 8px; }
+  .visual-css .line { height: 8px; background: #475569; border-radius: 4px; margin-bottom: 4px; }
+  .visual-css .line1 { width: 90%; }
+  .visual-css .line2 { width: 75%; margin-bottom: 12px; }
+  .visual-css .boxes { display: flex; gap: 8px; }
+  .visual-css .box { height: 40px; flex: 1; background: linear-gradient(135deg, #1e3a5f, #2a9d8f); border-radius: 10px; }
+
+  /* JS visual */
+  .visual-js { border-radius: 12px; padding: 16px; background: #fffbeb; border: 1px solid #fde68a; }
+  .visual-js .btns { display: flex; gap: 8px; margin-bottom: 8px; }
+  .visual-js .btn-a { padding: 8px 20px; background: #e9c46a; border-radius: 8px; font-size: 12px; font-weight: 700; color: #78350f; }
+  .visual-js .btn-b { padding: 8px 20px; background: #fde68a; border-radius: 8px; font-size: 12px; font-weight: 600; color: #92400e; }
+  .visual-js .note { font-size: 11px; color: #92400e; font-style: italic; }
+
+  /* Frontend/Backend split */
+  .fb-split { display: flex; gap: 0; margin-bottom: 20px; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .fb-side { flex: 1; padding: 20px; text-align: center; }
+  .fb-front { background: linear-gradient(180deg, #ede9fe, #f5f3ff); }
+  .fb-back { background: linear-gradient(180deg, #f1f5f9, #f8fafc); }
+  .fb-icon { font-size: 32px; margin-bottom: 8px; }
+  .fb-title { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .fb-sub { font-size: 12px; font-weight: 500; line-height: 1.5; }
+  .fb-detail { margin-top: 12px; padding: 8px 12px; background: white; border-radius: 8px; font-size: 11px; color: #64748b; line-height: 1.6; }
+  .fb-badge { margin-top: 8px; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+  .fb-badge-active { background: #7c3aed; color: white; }
+  .fb-badge-inactive { background: #e2e8f0; color: #64748b; }
+  .fb-divider { width: 2px; background: #e2e8f0; position: relative; display: flex; align-items: center; justify-content: center; }
+  .fb-divider-dot { position: absolute; background: white; border: 2px solid #e2e8f0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+  /* Deploy diagram */
+  .deploy-diagram { background: #f8fafc; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+  .deploy-flow { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .deploy-node { text-align: center; flex: 1; }
+  .deploy-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 28px; }
+  .deploy-label { font-size: 13px; font-weight: 700; color: #334155; }
+  .deploy-sublabel { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .deploy-arrow { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .deploy-arrow-label { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+  .deploy-arrow-char { font-size: 20px; }
+  .deploy-footer { text-align: center; margin-top: 14px; font-size: 12px; color: #94a3b8; }
+
+  /* Localhost visual */
+  .localhost-split { display: flex; gap: 20px; align-items: stretch; }
+  .localhost-card { flex: 1; border-radius: 14px; padding: 20px; text-align: center; position: relative; }
+  .localhost-now { background: linear-gradient(135deg, #1e1b4b, #312e81); }
+  .localhost-later { background: white; border: 2px dashed #d1d5db; opacity: 0.6; }
+  .localhost-badge { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+
+  /* Vibe loop */
+  .vibe-loop { background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+  .vibe-loop-steps { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .vibe-step { text-align: center; min-width: 72px; }
+  .vibe-step-icon { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 22px; }
+  .vibe-step-label { font-size: 12px; font-weight: 700; color: #e0e7ff; margin-bottom: 2px; }
+  .vibe-step-desc { font-size: 10px; color: #a5b4fc; line-height: 1.4; }
+  .vibe-arrow { display: flex; align-items: center; color: #6366f1; font-size: 16px; padding-top: 8px; }
+  .vibe-footer { text-align: center; margin-top: 12px; font-size: 11px; color: #818cf8; font-style: italic; }
+
+  /* Prompt framework */
+  .framework { background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px 16px; margin-bottom: 20px; }
+  .framework-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .framework-row:last-of-type { margin-bottom: 0; }
+  .framework-badge { border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 800; min-width: 60px; text-align: center; color: white; flex-shrink: 0; }
+  .framework-q { font-size: 13px; color: #475569; flex: 1; }
+  .framework-example { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .framework-footer { margin-top: 16px; padding: 10px 14px; background: #f8fafc; border-radius: 10px; font-size: 12px; color: #64748b; text-align: center; line-height: 1.6; }
+
+  /* Input form */
+  .input-group { margin-bottom: 14px; }
+  .input-label { font-size: 13px; font-weight: 600; color: #64748b; display: block; margin-bottom: 6px; }
+  .input-field { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 15px; font-family: inherit; }
+  .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+
+  /* Prompt block */
+  .prompt-block { background: #1e1b4b; color: #c7d2fe; border-radius: 12px; padding: 20px; font-size: 14px; line-height: 1.7; font-family: monospace; white-space: pre-wrap; margin-bottom: 12px; }
+  .copy-btn { width: 100%; padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; background: #6366f1; color: white; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .copy-btn.copied { background: #059669; }
+
+  /* Permission cards */
+  .perm-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; overflow: hidden; transition: background 0.2s; }
+  .perm-card.open { background: #faf5ff; }
+  .perm-header { width: 100%; padding: 12px 16px; background: none; border: none; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left; font-family: inherit; }
+  .perm-icon { font-size: 20px; }
+  .perm-label { font-family: monospace; font-size: 13px; color: #7c3aed; font-weight: 600; background: #ede9fe; padding: 4px 10px; border-radius: 6px; flex: 1; }
+  .perm-arrow { font-size: 12px; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; }
+  .perm-card.open .perm-arrow { transform: rotate(180deg); }
+  .perm-body { padding: 0 16px 14px; display: none; }
+  .perm-card.open .perm-body { display: block; }
+  .perm-desc { font-size: 14px; color: #475569; line-height: 1.7; margin-bottom: 12px; }
+  .perm-verdict { background: #ecfdf5; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #065f46; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+  /* Expandable cards */
+  .expand-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; overflow: hidden; background: white; }
+  .expand-header { width: 100%; padding: 14px 18px; background: none; border: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 15px; font-weight: 600; color: #1e293b; text-align: left; font-family: inherit; }
+  .expand-arrow { font-size: 12px; color: #94a3b8; transition: transform 0.2s; }
+  .expand-card.open .expand-arrow { transform: rotate(180deg); }
+  .expand-body { padding: 0 18px 16px; color: #475569; font-size: 14px; line-height: 1.7; display: none; }
+  .expand-card.open .expand-body { display: block; }
+
+  /* Iteration prompts */
+  .iter-card { background: #f8fafc; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .iter-text { font-size: 14px; color: #334155; line-height: 1.6; flex: 1; }
+  .iter-copy { background: #ede9fe; color: #6d28d9; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: inherit; }
+
+  /* Success card */
+  .success-card { background: #f0fdf4; border-radius: 12px; padding: 20px; border: 1px solid #bbf7d0; text-align: center; margin-top: 16px; }
+  .success-icon { font-size: 28px; margin-bottom: 8px; }
+  .success-title { font-size: 16px; font-weight: 700; color: #15803d; margin-bottom: 8px; }
+  .success-text { font-size: 14px; color: #475569; line-height: 1.7; }
+
+  /* Recap list */
+  .recap-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; align-items: center; }
+  .recap-item:last-child { border-bottom: none; }
+  .recap-icon { font-size: 18px; flex-shrink: 0; }
+  .recap-text { font-size: 14px; color: #475569; line-height: 1.6; }
+
+  /* Next grid */
+  .next-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .next-card { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; }
+  .next-card-icon { font-size: 24px; margin-bottom: 6px; }
+  .next-card-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+  .next-card-desc { font-size: 12px; color: #94a3b8; line-height: 1.4; }
+
+  /* Project summary */
+  .summary-card { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+  .summary-card p { font-size: 14px; color: #475569; line-height: 2; }
+
+  .text-center { text-align: center; }
+  .text-muted { color: #64748b; }
+  .text-sm { font-size: 15px; line-height: 1.7; }
+  .mt-16 { margin-top: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .mb-24 { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Progress -->
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11.1%"></div></div>
+  <div class="progress-labels"><span id="stepLabel">Step 1 of 9</span><span id="stepName">Your First Vibe Code</span></div>
+
+  <!-- Step header -->
+  <div class="step-header">
+    <h1 id="stepTitle">Your First Vibe Code</h1>
+    <p id="stepSubtitle">You're about to build something real with AI.</p>
+  </div>
+
+  <!-- Step content -->
+  <div class="step-content">
+
+    <!-- STEP 0: Welcome -->
+    <div class="step active" id="step-0">
+      <p>In the next few minutes, you're going to build a personal website and put it on the internet. No prior coding experience needed.</p>
+      <p>You'll do it by having a conversation with Claude — describing what you want in plain English, and letting the AI write the code. This is called <strong>vibe coding</strong>.</p>
+
+      <div style="background:#f8fafc;border-radius:16px;padding:20px;border:1px solid #e2e8f0;margin-bottom:24px">
+        <div class="section-label">How this guide works</div>
+        <div class="how-it-works">
+          <div class="how-card how-card-left">
+            <div class="how-card-icon">💬</div>
+            <div class="how-card-title">Claude Code</div>
+            <div class="how-card-desc">Talk to Claude here. Paste prompts, ask questions.</div>
+          </div>
+          <div class="how-arrow">↔</div>
+          <div class="how-card how-card-right">
+            <div class="how-card-icon">📖</div>
+            <div class="how-card-title">This guide</div>
+            <div class="how-card-desc">Follow along here. It explains what's happening.</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm text-muted">By the end, you'll have a live website with a link you can text to someone. And you'll understand what actually happened — no magic, no mystery.</p>
+    </div>
+
+    <!-- STEP 1: Demystify -->
+    <div class="step" id="step-1">
+      <div class="dark-card">
+        <h2>Code is just files and folders.</h2>
+        <p>Text files on your computer that act as instructions telling your computer what to do.</p>
+      </div>
+
+      <!-- Folder tree -->
+      <div class="folder-tree">
+        <div class="tree-header section-label" style="text-align:left;margin-bottom:0">Your project is just this:</div>
+        <div id="folderTree">
+          <div class="tree-item folder" style="padding-left:12px">
+            <span class="tree-icon">📁</span>
+            <span class="tree-name folder-name">my-website</span>
+          </div>
+          <div class="tree-item" style="padding-left:32px" data-file="index.html" data-tooltip="The skeleton — tells the browser what content exists on the page" data-color="#e76f51">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">index.html</span>
+            <span class="tree-hint" style="color:#e76f51">hover me</span>
+          </div>
+          <div class="tree-tooltip" id="tip-index.html" style="margin-left:32px;border-left:3px solid #e76f51"></div>
+          <div class="tree-item" style="padding-left:32px" data-file="style.css" data-tooltip="The outfit — colors, fonts, spacing, layout. How things look." data-color="#2a9d8f">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">style.css</span>
+            <span class="tree-hint" style="color:#2a9d8f">hover me</span>
+          </div>
+          <div class="tree-tooltip" id="tip-style.css" style="margin-left:32px;border-left:3px solid #2a9d8f"></div>
+          <div class="tree-item folder" style="padding-left:32px">
+            <span class="tree-icon">📁</span>
+            <span class="tree-name folder-name">src</span>
+          </div>
+          <div class="tree-item" style="padding-left:52px" data-file="App.jsx" data-tooltip="The brain — the logic and interactive behavior of your site" data-color="#e9c46a">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">App.jsx</span>
+            <span class="tree-hint" style="color:#e9c46a">hover me</span>
+          </div>
+          <div class="tree-tooltip" id="tip-App.jsx" style="margin-left:52px;border-left:3px solid #e9c46a"></div>
+          <div class="tree-item" style="padding-left:32px" data-file="package.json" data-tooltip="The shopping list — which pre-built tools your project uses" data-color="#264653">
+            <span class="tree-icon">📄</span>
+            <span class="tree-name">package.json</span>
+            <span class="tree-hint" style="color:#264653">hover me</span>
+          </div>
+          <div class="tree-tooltip" id="tip-package.json" style="margin-left:32px;border-left:3px solid #264653"></div>
+        </div>
+        <div class="tree-footer" id="treeFooter">Hover over a file to see what it does</div>
+      </div>
+
+      <!-- Website anatomy -->
+      <div class="mb-24">
+        <div class="section-label">The three layers of every website</div>
+        <div class="anatomy-tabs">
+          <button class="anatomy-tab" data-layer="html" style="--tab-color:#e76f51;--tab-bg:#fff5f3" onclick="toggleLayer('html')">
+            <div class="anatomy-tab-label" style="color:#e76f51">HTML</div>
+            <div class="anatomy-tab-meta">The skeleton</div>
+          </button>
+          <button class="anatomy-tab" data-layer="css" style="--tab-color:#2a9d8f;--tab-bg:#f0fdf9" onclick="toggleLayer('css')">
+            <div class="anatomy-tab-label" style="color:#2a9d8f">CSS</div>
+            <div class="anatomy-tab-meta">The outfit</div>
+          </button>
+          <button class="anatomy-tab" data-layer="js" style="--tab-color:#e9c46a;--tab-bg:#fffbeb" onclick="toggleLayer('js')">
+            <div class="anatomy-tab-label" style="color:#e9c46a">JavaScript</div>
+            <div class="anatomy-tab-meta">The brain</div>
+          </button>
+        </div>
+
+        <div class="anatomy-content" id="layer-html">
+          <div class="visual-html">
+            <div class="bar"></div>
+            <div class="line line1"></div>
+            <div class="line line2"></div>
+            <div class="boxes"><div class="box"></div><div class="box"></div></div>
+          </div>
+          <div class="anatomy-desc">Defines WHAT is on the page — headings, paragraphs, images, buttons. Like the frame of a house before walls and paint.</div>
+        </div>
+
+        <div class="anatomy-content" id="layer-css">
+          <div class="visual-css">
+            <div class="bar"></div>
+            <div class="line line1"></div>
+            <div class="line line2"></div>
+            <div class="boxes"><div class="box"></div><div class="box"></div></div>
+          </div>
+          <div class="anatomy-desc">Controls HOW things look — colors, fonts, spacing, layout. Same skeleton, totally different vibe depending on the CSS.</div>
+        </div>
+
+        <div class="anatomy-content" id="layer-js">
+          <div class="visual-js">
+            <div class="btns">
+              <div class="btn-a">Click me!</div>
+              <div class="btn-b">I respond!</div>
+            </div>
+            <div class="note">JS makes buttons do things, pages update, content change</div>
+          </div>
+          <div class="anatomy-desc">Defines WHAT HAPPENS — when you click a button, when data loads, when something animates. It makes the page interactive.</div>
+        </div>
+
+        <div class="anatomy-hint" id="layerHint">Tap a layer to see what it does</div>
+      </div>
+
+      <!-- Frontend vs Backend -->
+      <div class="fb-split">
+        <div class="fb-side fb-front">
+          <div class="fb-icon">👁️</div>
+          <div class="fb-title" style="color:#6d28d9">Frontend</div>
+          <div class="fb-sub" style="color:#7c3aed">What people see</div>
+          <div class="fb-detail">Buttons, text, colors, layout, animations</div>
+          <div class="fb-badge fb-badge-active">Building this today</div>
+        </div>
+        <div class="fb-divider"><div class="fb-divider-dot">↔</div></div>
+        <div class="fb-side fb-back">
+          <div class="fb-icon">⚙️</div>
+          <div class="fb-title" style="color:#475569">Backend</div>
+          <div class="fb-sub" style="color:#64748b">The logic behind it</div>
+          <div class="fb-detail">Logins, databases, saved data, API calls</div>
+          <div class="fb-badge fb-badge-inactive">Not needed yet</div>
+        </div>
+      </div>
+
+      <!-- Deploy diagram -->
+      <div class="deploy-diagram">
+        <div class="section-label">What "deploying" actually means</div>
+        <div class="deploy-flow">
+          <div class="deploy-node">
+            <div class="deploy-icon" style="background:linear-gradient(135deg,#6366f1,#7c3aed)">💻</div>
+            <div class="deploy-label">Your computer</div>
+            <div class="deploy-sublabel">Files live here now</div>
+          </div>
+          <div class="deploy-arrow">
+            <div class="deploy-arrow-label" style="color:#6366f1;background:#ede9fe">copy</div>
+            <div class="deploy-arrow-char" style="color:#a5b4fc">→</div>
+          </div>
+          <div class="deploy-node">
+            <div class="deploy-icon" style="background:linear-gradient(135deg,#059669,#10b981)">☁️</div>
+            <div class="deploy-label">A server</div>
+            <div class="deploy-sublabel">Always on, on the internet</div>
+          </div>
+          <div class="deploy-arrow">
+            <div class="deploy-arrow-label" style="color:#059669;background:#ecfdf5">link</div>
+            <div class="deploy-arrow-char" style="color:#6ee7b7">→</div>
+          </div>
+          <div class="deploy-node">
+            <div class="deploy-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">🌍</div>
+            <div class="deploy-label">Anyone</div>
+            <div class="deploy-sublabel">Opens your URL</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm text-muted text-center" style="font-style:italic">That's it. No mystery. When Claude "writes code," it's creating text files in a folder. When you "deploy," you're copying those files to the internet.</p>
+    </div>
+
+    <!-- STEP 2: Plan -->
+    <div class="step" id="step-2">
+      <p>The biggest mistake people make with vibe coding is jumping straight to "build me a thing." The best results come from thinking like a product manager first.</p>
+
+      <div class="framework">
+        <div class="section-label">The prompt-building framework</div>
+        <div class="framework-row">
+          <div class="framework-badge" style="background:#6366f1">WHO</div>
+          <div class="framework-q">is this for?</div>
+          <div class="framework-example" style="background:#ede9fe;color:#6366f1">Anyone I share the link with</div>
+        </div>
+        <div class="framework-row">
+          <div class="framework-badge" style="background:#059669">WHY</div>
+          <div class="framework-q">does it need to exist?</div>
+          <div class="framework-example" style="background:#ecfdf5;color:#059669">A professional intro to who I am</div>
+        </div>
+        <div class="framework-row">
+          <div class="framework-badge" style="background:#0284c7">WHERE</div>
+          <div class="framework-q">will it live?</div>
+          <div class="framework-example" style="background:#f0f9ff;color:#0284c7">On the internet, with a real URL</div>
+        </div>
+        <div class="framework-row">
+          <div class="framework-badge" style="background:#dc2626">HOW GOOD</div>
+          <div class="framework-q">does it need to be?</div>
+          <div class="framework-example" style="background:#fef2f2;color:#dc2626">"Wait, you made that?" impressive</div>
+        </div>
+        <div class="framework-footer">Answer these before telling Claude <strong>WHAT</strong> to build.<br>Same thinking a good consultant does — you already know how.</div>
+      </div>
+
+      <div class="summary-card">
+        <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:12px">For today's project, we've already answered:</div>
+        <p>
+          <strong>What:</strong> A personal landing page / website<br>
+          <strong>Who:</strong> Anyone you share the link with<br>
+          <strong>Why:</strong> A shareable, professional intro to who you are<br>
+          <strong>Where:</strong> On the internet, with a real URL<br>
+          <strong>How good:</strong> Impressive enough that people say "wait, you made that?"
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 3: Prompt -->
+    <div class="step" id="step-3">
+      <p>First, personalize your page. Then copy the prompt below and paste it into your Claude Code chat.</p>
+
+      <div style="background:#f8fafc;border-radius:12px;padding:20px;border:1px solid #e2e8f0;margin-bottom:20px">
+        <div class="input-group">
+          <label class="input-label">Your name</label>
+          <input class="input-field" type="text" id="userName" placeholder="e.g. Sarah Chen" oninput="updatePrompt()">
+        </div>
+        <div>
+          <label class="input-label">Your role / what you do</label>
+          <input class="input-field" type="text" id="userRole" placeholder="e.g. Marketing Director at Acme Corp" oninput="updatePrompt()">
+        </div>
+      </div>
+
+      <div style="margin-top:16px;margin-bottom:8px">
+        <div class="prompt-block" id="mainPrompt"></div>
+        <button class="copy-btn" onclick="copyPrompt()">Copy this prompt</button>
+      </div>
+
+      <div class="callout callout-amber mt-16">
+        <div class="callout-title" style="color:#92400e">What happens next</div>
+        <div class="callout-text">Claude will start creating files and may ask you a few questions about your preferences. It'll also ask for permission to do things — that's the next step in this guide.</div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Permissions -->
+    <div class="step" id="step-4">
+      <p>Claude will ask permission before doing certain things. This is a safety feature, not a warning sign.</p>
+      <p class="text-sm text-muted mb-20">Tap any to expand and see what it really means.</p>
+
+      <div id="permCards">
+        <div class="perm-card" onclick="togglePerm(this)">
+          <button class="perm-header"><span class="perm-icon">📦</span><span class="perm-label">"Install npm packages" or "Run npm install"</span><span class="perm-arrow">▼</span></button>
+          <div class="perm-body">
+            <div class="perm-desc">Claude wants to download pre-built tools that other developers made. Think of it like installing apps on your phone — these are common, trusted building blocks so Claude doesn't have to write everything from scratch.</div>
+            <div class="perm-verdict"><span>✅</span> Say yes. This is normal for every project.</div>
+          </div>
+        </div>
+        <div class="perm-card" onclick="togglePerm(this)">
+          <button class="perm-header"><span class="perm-icon">📁</span><span class="perm-label">"Create directory" or "Make folder"</span><span class="perm-arrow">▼</span></button>
+          <div class="perm-body">
+            <div class="perm-desc">Claude is organizing your project into folders, just like you'd make folders in Finder or File Explorer to keep things tidy.</div>
+            <div class="perm-verdict"><span>✅</span> Say yes. It's just making folders on your computer.</div>
+          </div>
+        </div>
+        <div class="perm-card" onclick="togglePerm(this)">
+          <button class="perm-header"><span class="perm-icon">🖥️</span><span class="perm-label">"Start the dev server" or "Run npm run dev"</span><span class="perm-arrow">▼</span></button>
+          <div class="perm-body">
+            <div class="perm-desc">This turns your files into a live preview you can see in your browser. It's running on YOUR computer only — nobody else can see it yet.</div>
+            <div class="perm-verdict"><span>✅</span> Say yes. This is how you preview your work.</div>
+          </div>
+        </div>
+        <div class="perm-card" onclick="togglePerm(this)">
+          <button class="perm-header"><span class="perm-icon">📝</span><span class="perm-label">"Write to file" or "Create file"</span><span class="perm-arrow">▼</span></button>
+          <div class="perm-body">
+            <div class="perm-desc">Claude is creating or editing the actual files that make up your project. This is the core of what it does — writing the code files for you.</div>
+            <div class="perm-verdict"><span>✅</span> Say yes. This is literally the point.</div>
+          </div>
+        </div>
+        <div class="perm-card" onclick="togglePerm(this)">
+          <button class="perm-header"><span class="perm-icon">💾</span><span class="perm-label">"Initialize git" or "git init"</span><span class="perm-arrow">▼</span></button>
+          <div class="perm-body">
+            <div class="perm-desc">Git is a save-point system for code. Think of it like "version history" in Google Docs. It lets you go back to earlier versions if needed.</div>
+            <div class="perm-verdict"><span>✅</span> Say yes. It's a safety net, not a risk.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-blue mt-16">
+        <div class="callout-title" style="color:#0c4a6e">Pro tip</div>
+        <div class="callout-text">If you see something not listed here and you're not sure, ask Claude: "Can you explain what this does in simple terms before I approve it?"</div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Localhost -->
+    <div class="step" id="step-5">
+      <p>Once Claude finishes building, it'll start a "dev server" and give you a link. Here's what that means:</p>
+
+      <div class="deploy-diagram">
+        <div class="section-label">Where your site is right now</div>
+        <div class="localhost-split">
+          <div class="localhost-card localhost-now">
+            <div class="localhost-badge" style="background:#6366f1;color:white">RIGHT NOW</div>
+            <div style="font-size:28px;margin-bottom:6px;margin-top:8px">💻</div>
+            <div style="font-size:14px;font-weight:700;color:#e0e7ff">localhost:5173</div>
+            <div style="font-size:11px;color:#a5b4fc;margin-top:6px;line-height:1.5">Only YOU can see it<br>Running on your computer</div>
+          </div>
+          <div class="localhost-card localhost-later">
+            <div class="localhost-badge" style="background:#d1d5db;color:#64748b">AFTER DEPLOY</div>
+            <div style="font-size:28px;margin-bottom:6px;margin-top:8px">🌍</div>
+            <div style="font-size:14px;font-weight:700;color:#64748b">yoursite.netlify.app</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:6px;line-height:1.5">ANYONE with the link<br>Running on a server</div>
+          </div>
+        </div>
+        <div class="deploy-footer">Same files. Same site. Different location.</div>
+      </div>
+
+      <div class="expand-card" onclick="toggleExpand(this)">
+        <button class="expand-header">What is a dev server?<span class="expand-arrow">▼</span></button>
+        <div class="expand-body">A tiny program that turns your code files into a working website and shows it in your browser. It also watches for changes — when Claude edits a file, the page updates automatically. This is only for development. When you deploy later, the real version won't need this.</div>
+      </div>
+
+      <div class="expand-card" onclick="toggleExpand(this)">
+        <button class="expand-header">What does "port 5173" mean?<span class="expand-arrow">▼</span></button>
+        <div class="expand-body">Your computer has thousands of numbered "doors" (ports). The dev server picks one to use — usually 5173 for Vite projects. It's like an apartment number: the building is your computer, the port is which door to knock on.</div>
+      </div>
+
+      <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Open that link in your browser.</div>
+        <div class="success-text">You should see your landing page. Take a second — you built that. With a conversation.</div>
+      </div>
+    </div>
+
+    <!-- STEP 6: Iterate -->
+    <div class="step" id="step-6">
+      <p>Now comes the best part. You can change anything by just asking.</p>
+
+      <div class="vibe-loop">
+        <div class="section-label" style="color:#a5b4fc">The vibe coding loop</div>
+        <div class="vibe-loop-steps">
+          <div class="vibe-step">
+            <div class="vibe-step-icon">💬</div>
+            <div class="vibe-step-label">Describe</div>
+            <div class="vibe-step-desc">Tell Claude what you want</div>
+          </div>
+          <div class="vibe-arrow">→</div>
+          <div class="vibe-step">
+            <div class="vibe-step-icon">⚡</div>
+            <div class="vibe-step-label">Generate</div>
+            <div class="vibe-step-desc">Claude writes the code</div>
+          </div>
+          <div class="vibe-arrow">→</div>
+          <div class="vibe-step">
+            <div class="vibe-step-icon">👀</div>
+            <div class="vibe-step-label">Review</div>
+            <div class="vibe-step-desc">See the result in your browser</div>
+          </div>
+          <div class="vibe-arrow">→</div>
+          <div class="vibe-step">
+            <div class="vibe-step-icon">🔄</div>
+            <div class="vibe-step-label">Iterate</div>
+            <div class="vibe-step-desc">Ask for changes</div>
+          </div>
+        </div>
+        <div class="vibe-footer">↻ Repeat until it's exactly what you want</div>
+      </div>
+
+      <p class="text-sm text-muted mb-20">Try any of these — or make up your own. Just type it in the chat.</p>
+
+      <div class="iter-card">
+        <div class="iter-text">"Change the color scheme to dark mode with an accent color of electric blue."</div>
+        <button class="iter-copy" onclick="copyText('Change the color scheme to dark mode with an accent color of electric blue.')">Copy</button>
+      </div>
+      <div class="iter-card">
+        <div class="iter-text">"Add a smooth scroll animation when the page loads — I want each section to fade in as the user scrolls down."</div>
+        <button class="iter-copy" onclick="copyText('Add a smooth scroll animation when the page loads — I want each section to fade in as the user scrolls down.')">Copy</button>
+      </div>
+      <div class="iter-card">
+        <div class="iter-text">"Replace the placeholder text in the about section with this: [paste your own text]"</div>
+        <button class="iter-copy" onclick="copyText('Replace the placeholder text in the about section with this: ')">Copy</button>
+      </div>
+      <div class="iter-card">
+        <div class="iter-text">"Make it look more playful and less corporate. Rounder corners, a friendlier font, maybe a subtle pattern in the background."</div>
+        <button class="iter-copy" onclick="copyText('Make it look more playful and less corporate. Rounder corners, a friendlier font, maybe a subtle pattern in the background.')">Copy</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Deploy -->
+    <div class="step" id="step-7">
+      <p>Your site is running on your computer. Now let's put it on the internet.</p>
+
+      <div class="deploy-diagram">
+        <div class="section-label">What "deploying" actually means</div>
+        <div class="deploy-flow">
+          <div class="deploy-node">
+            <div class="deploy-icon" style="background:linear-gradient(135deg,#6366f1,#7c3aed)">💻</div>
+            <div class="deploy-label">Your computer</div>
+            <div class="deploy-sublabel">Files live here now</div>
+          </div>
+          <div class="deploy-arrow">
+            <div class="deploy-arrow-label" style="color:#6366f1;background:#ede9fe">copy</div>
+            <div class="deploy-arrow-char" style="color:#a5b4fc">→</div>
+          </div>
+          <div class="deploy-node">
+            <div class="deploy-icon" style="background:linear-gradient(135deg,#059669,#10b981)">☁️</div>
+            <div class="deploy-label">A server</div>
+            <div class="deploy-sublabel">Always on, on the internet</div>
+          </div>
+          <div class="deploy-arrow">
+            <div class="deploy-arrow-label" style="color:#059669;background:#ecfdf5">link</div>
+            <div class="deploy-arrow-char" style="color:#6ee7b7">→</div>
+          </div>
+          <div class="deploy-node">
+            <div class="deploy-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">🌍</div>
+            <div class="deploy-label">Anyone</div>
+            <div class="deploy-sublabel">Opens your URL</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm text-muted">Ask Claude to deploy it for you:</p>
+
+      <div style="margin-top:16px;margin-bottom:8px">
+        <div class="prompt-block">I'm happy with how this looks. Can you help me deploy it so I can share the link? Use Netlify — set it up so I can deploy with a simple command. Walk me through any accounts I need to create.</div>
+        <button class="copy-btn" onclick="copyText(document.querySelector('#step-7 .prompt-block').textContent)">Copy this prompt</button>
+      </div>
+
+      <div class="expand-card mt-16" onclick="toggleExpand(this)">
+        <button class="expand-header">What Claude will do<span class="expand-arrow">▼</span></button>
+        <div class="expand-body">
+          <ol style="padding-left:20px;line-height:2">
+            <li>Build a production version of your site (optimized files)</li>
+            <li>Guide you through creating a free Netlify account if needed</li>
+            <li>Deploy your files to Netlify's servers</li>
+            <li>Give you a URL like <code>your-site-name.netlify.app</code></li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="success-card">
+        <div class="success-icon">🚀</div>
+        <div class="success-title" style="font-size:18px">Once it's deployed, copy that link.</div>
+        <div class="success-text">Text it to someone. "Hey, I made this." That's the moment.</div>
+      </div>
+    </div>
+
+    <!-- STEP 8: Done -->
+    <div class="step" id="step-8">
+      <div class="dark-card">
+        <div style="font-size:36px;margin-bottom:8px">🎊</div>
+        <h2 style="font-size:24px">You just built software.</h2>
+        <p>You described what you wanted. AI wrote the code. You iterated. You deployed. That's the whole process.</p>
+      </div>
+
+      <div style="font-size:16px;font-weight:600;color:#1e293b;margin-bottom:16px">What you actually learned:</div>
+      <div class="mb-20">
+        <div class="recap-item"><span class="recap-icon">📁</span><span class="recap-text">Code is files and folders — text files that are instructions for computers.</span></div>
+        <div class="recap-item"><span class="recap-icon">🌐</span><span class="recap-text">A website is a collection of these files that a browser knows how to display.</span></div>
+        <div class="recap-item"><span class="recap-icon">👁️</span><span class="recap-text">Frontend is what people see. Backend is the logic behind it.</span></div>
+        <div class="recap-item"><span class="recap-icon">💻</span><span class="recap-text">Localhost = your computer. Deploying = putting files on the internet.</span></div>
+        <div class="recap-item"><span class="recap-icon">📦</span><span class="recap-text">Packages are pre-built tools — like apps for your code project.</span></div>
+        <div class="recap-item"><span class="recap-icon">🔄</span><span class="recap-text">The vibe coding loop: describe → generate → review → iterate.</span></div>
+        <div class="recap-item"><span class="recap-icon">🎯</span><span class="recap-text">Good prompts start with WHO and WHY, not just WHAT.</span></div>
+      </div>
+
+      <div style="font-size:16px;font-weight:600;color:#1e293b;margin-bottom:12px">What to build next:</div>
+      <div class="next-grid">
+        <div class="next-card">
+          <div class="next-card-icon">🛠️</div>
+          <div class="next-card-title">A team tool</div>
+          <div class="next-card-desc">Solve a real workflow problem</div>
+        </div>
+        <div class="next-card">
+          <div class="next-card-icon">🧮</div>
+          <div class="next-card-title">A calculator</div>
+          <div class="next-card-desc">Specific to your domain</div>
+        </div>
+        <div class="next-card">
+          <div class="next-card-icon">📊</div>
+          <div class="next-card-title">A dashboard</div>
+          <div class="next-card-desc">Visualize data that matters</div>
+        </div>
+        <div class="next-card">
+          <div class="next-card-icon">💼</div>
+          <div class="next-card-title">An internal app</div>
+          <div class="next-card-desc">Something your company needs</div>
+        </div>
+      </div>
+
+      <p class="text-sm text-muted text-center">The gap between "person with ideas" and "person who builds things" just got a lot smaller.</p>
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button class="btn btn-back" id="btnBack" onclick="prevStep()" style="display:none">Back</button>
+    <button class="btn btn-next" id="btnNext" onclick="nextStep()">Let's go</button>
+  </div>
+
+  <!-- Dots -->
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+const STEPS = [
+  { title: "Your First Vibe Code", subtitle: "You're about to build something real with AI." },
+  { title: "Code Is Just Files", subtitle: "The single mental model that changes everything." },
+  { title: "Think Before You Build", subtitle: "Great projects start with clear thinking, not code." },
+  { title: "Start Your Project", subtitle: "Paste this prompt and watch what happens." },
+  { title: "When Claude Asks Permission", subtitle: 'The "scary" moments explained.' },
+  { title: "See It Live", subtitle: "Your creation is running on your computer." },
+  { title: "Make It Yours", subtitle: "Your first iteration. This is where it gets fun." },
+  { title: "Share It With the World", subtitle: "Put it on the internet. Send the link." },
+  { title: "You Just Vibe Coded", subtitle: "What you learned, and where to go next." },
+];
+
+let currentStep = 0;
+
+// Init dots
+const dotsEl = document.getElementById("dots");
+STEPS.forEach((_, i) => {
+  const dot = document.createElement("button");
+  dot.className = "dot" + (i === 0 ? " active" : "");
+  dot.onclick = () => goToStep(i);
+  dotsEl.appendChild(dot);
+});
+
+// Init prompt
+updatePrompt();
+
+function goToStep(n) {
+  document.getElementById("step-" + currentStep).classList.remove("active");
+  currentStep = n;
+  document.getElementById("step-" + currentStep).classList.add("active");
+
+  // Update header
+  document.getElementById("stepTitle").textContent = STEPS[n].title;
+  document.getElementById("stepSubtitle").textContent = STEPS[n].subtitle;
+  document.getElementById("stepLabel").textContent = "Step " + (n + 1) + " of " + STEPS.length;
+  document.getElementById("stepName").textContent = STEPS[n].title;
+  document.getElementById("progressFill").style.width = (((n + 1) / STEPS.length) * 100) + "%";
+
+  // Update nav
+  document.getElementById("btnBack").style.display = n > 0 ? "" : "none";
+  const btnNext = document.getElementById("btnNext");
+  if (n >= STEPS.length - 1) {
+    btnNext.style.display = "none";
+  } else {
+    btnNext.style.display = "";
+    btnNext.textContent = n === 0 ? "Let's go" : "Next step";
+  }
+
+  // Update dots
+  const dots = dotsEl.querySelectorAll(".dot");
+  dots.forEach((d, i) => {
+    d.className = "dot" + (i === n ? " active" : i < n ? " completed" : "");
+  });
+
+  // Scroll to top
+  window.scrollTo(0, 0);
+}
+
+function nextStep() { if (currentStep < STEPS.length - 1) goToStep(currentStep + 1); }
+function prevStep() { if (currentStep > 0) goToStep(currentStep - 1); }
+
+// Folder tree hover
+document.querySelectorAll(".tree-item[data-file]").forEach(item => {
+  const file = item.getAttribute("data-file");
+  const tip = document.getElementById("tip-" + file);
+  const hint = item.querySelector(".tree-hint");
+
+  item.addEventListener("mouseenter", () => {
+    tip.textContent = item.getAttribute("data-tooltip");
+    tip.classList.add("visible");
+    hint.textContent = "";
+    document.getElementById("treeFooter").textContent = "";
+  });
+  item.addEventListener("mouseleave", () => {
+    tip.classList.remove("visible");
+    hint.textContent = "hover me";
+    document.getElementById("treeFooter").textContent = "Hover over a file to see what it does";
+  });
+});
+
+// Website anatomy tabs
+let activeLayer = null;
+function toggleLayer(id) {
+  const tabs = document.querySelectorAll(".anatomy-tab");
+  const contents = document.querySelectorAll(".anatomy-content");
+  const hint = document.getElementById("layerHint");
+
+  if (activeLayer === id) {
+    activeLayer = null;
+    tabs.forEach(t => t.classList.remove("active"));
+    contents.forEach(c => c.classList.remove("active"));
+    hint.style.display = "";
+  } else {
+    activeLayer = id;
+    tabs.forEach(t => t.classList.toggle("active", t.getAttribute("data-layer") === id));
+    contents.forEach(c => c.classList.toggle("active", c.id === "layer-" + id));
+    hint.style.display = "none";
+  }
+}
+
+// Permission cards
+function togglePerm(card) {
+  const wasOpen = card.classList.contains("open");
+  document.querySelectorAll(".perm-card").forEach(c => c.classList.remove("open"));
+  if (!wasOpen) card.classList.add("open");
+}
+
+// Expandable cards
+function toggleExpand(card) {
+  card.classList.toggle("open");
+}
+
+// Prompt builder
+function updatePrompt() {
+  const name = document.getElementById("userName")?.value || "[Your Name]";
+  const role = document.getElementById("userRole")?.value || "[Your Title / What You Do]";
+  const prompt = `I want to build a personal landing page — a single-page website that introduces me and what I do. Here's my info:
+
+Name: ${name}
+Role: ${role}
+
+I want it to feel modern, clean, and professional — something I'd be proud to share. Think a tasteful gradient background, clean typography, and maybe a subtle animation or two.
+
+Include:
+- A hero section with my name and title
+- A short "about me" section (use placeholder text I can edit later)
+- 3 cards for things I work on or care about (placeholder content is fine)
+- A footer with a way to contact me
+
+Use a modern tech stack — React with Vite is great. Keep it a single page. Make it look really good. I want to be able to show this to people and have them say "wait, you made that?"`;
+
+  const el = document.getElementById("mainPrompt");
+  if (el) el.textContent = prompt;
+}
+
+// Copy functions
+function copyPrompt() {
+  const text = document.getElementById("mainPrompt").textContent;
+  copyText(text, document.querySelector("#step-3 .copy-btn"));
+}
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (!btn) return;
+    btn.classList.add("copied");
+    btn.textContent = "Copied to clipboard!";
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.textContent = "Copy this prompt";
+    }, 2000);
+  });
+}
+
+// Override for iteration copy buttons
+document.querySelectorAll(".iter-copy").forEach(btn => {
+  btn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    const text = this.parentElement.querySelector(".iter-text").textContent.replace(/^"|"$/g, "");
+    navigator.clipboard.writeText(text).then(() => {
+      this.textContent = "Copied!";
+      setTimeout(() => { this.textContent = "Copy"; }, 1500);
+    });
+  });
+});
+
+// Keyboard nav
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") nextStep();
+  if (e.key === "ArrowLeft" || e.key === "ArrowUp") prevStep();
+});
+</script>
+</body>
+</html>
